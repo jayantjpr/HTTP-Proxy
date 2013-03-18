@@ -1,0 +1,197 @@
+================================================================
+
+    README file for Assignment 2 - HTTP Proxy
+
+           Name:	Jayant Gupta 
+      Roll No. :	10012319
+     Department:	Mathematics & Computing 
+ 
+================================================================
+
+HOW TO USE THE PROXY
+====================
+1. Copy all the files in one directory.
+
+2. On the terminal:
+	~$ cd <path-to-code>
+	~$ make all
+	~$ ./proxy <port_number>
+
+   --> The server should start listening for connections on the specified port.
+
+3. Connect to the server using telnet or web-client (like web-browser).
+4. Send a HTTP request, like: GET http://intranet.iitg.ernet.in/ HTTP/1.0
+5. The headers and HTML of IITG Intranet Web-homepage will be displayed on the terminal screen.
+
+EXIT THE SERVER
+================
+* You can exit the server by simply using Ctrl + C.
+
+LIMITATIONS
+===========
+* It does not handle concurrent requests, only sequential requests.
+* Only “GET” method is implemented.
+* Only HTTP/1.0 requests are generated (though it accepts HTTP/1.1 requests as well).
+* Connection: keep-alive not implemented.
+
+FEATURES
+========
+* Accepts “GET” requests. Otherwise, responds back with a "501 Not Implemented" error.
+* Flexibility in choosing the server port for the server.
+* Accepts all the available formats for HTTP headers. If something goes wrong, responds with a "400 Bad Request" error.
+* Works with HTTP/1.0 Also accepts HTTP/1.1 requests, but forwards the request to Web-server with HTTP version 1.0.
+* Closes the client and remote server connection after a request is complete.
+* Parses the given HTTP request, extarcts the hostname & Port, separates different header fields into a vector of  <Header Name, Header Value>.
+* Validates the HTTP Header as well as report error to client.
+* Always sends the request to Web-Server in relative path format.
+
+IMPLEMENTATION DETAILS
+=======================
+I. proxy.cpp is the main file & implements the http_proxy as follows:
+ 	
+	1.  Creates a Socket and binds it to a port --> specified as cmd-line argument.
+	2.  Starts listening on the socket.
+	3.  Accept connect from the client.
+	4.  Receive HTTP request from the Client.
+	5.  Parses/Tokenizes the HTTP Header and Checks for errors & unsupported methods. If Error in request, send the error to client.
+	6.  Extracts the hostname from HTTP Header and establishes a connection over a new socket with the Web-server. 
+	7.  Makes a HTTP request to the server, the HTTP Packet being in Relative path format.
+	8.  Receive HTTP Response from web-server.
+	9.  Forward the Response to the client. 
+	10. Close the connection with client. (Web-server automatically closes connection)
+	11. Wait for new connection and Goto Step 3.
+
+II. http_header_util.cpp & http_header_util.h 
+	* These files defines the class HTTPHeader and its member functions.
+	* The main purpose of the HTTPHeader class is to parse & tokenize the HTTP header received from client and store these tokens. 
+ 	* This helps in multiple way :
+ 		1. To reliably extract the url from the HTTP Header.
+ 		2. To Validitate the HTTP Header (check its correctness) and generate respective errors.
+ 		3. Construct a new header in a consistent manner.
+
+III. socket_util.c & socket_util.h 
+	* This file is the collection of utility functions which have been used in the proxy.cpp file to DEAL WITH SOCKETS.
+
+
+SAMPLE TEST
+============
+~$ telnet localhost 4567
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+GET /~maths/ HTTP/1.0
+host: shilloi.iitg.ernet.in
+HTTP/1.1 200 OK
+Date: Sun, 24 Feb 2013 13:44:02 GMT
+Server: Apache/2.2.15 (Red Hat)
+X-Powered-By: PHP/5.3.2
+Content-Length: 5502
+Connection: close
+Content-Type: text/html; charset=UTF-8
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Language" content="English" /><meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>Department of Mathematics, Indian Institute of Technology Guwahati</title>
+<link rel="stylesheet" type="text/css" href="default.css" media="screen" />
+<link rel="stylesheet" type="text/css" href="csshorizontalmenu.css" />
+<script type="text/javascript" src="csshorizontalmenu.js" >
+/***********************************************
+* CSS Horizontal List Menu- by JavaScript Kit (www.javascriptkit.com)
+* Menu interface credits:
+* http://www.dynamicdrive.com/style/csslibrary/item/glossy-vertical-menu/
+* This notice must stay intact for usage
+* Visit JavaScript Kit at http://www.javascriptkit.com/ for this script and 100s more
+***********************************************/
+</script>
+</head>
+<body><div id="wrap">
+<div id="header">
+<table border="0" cellpadding="0" cellspacing="0" width="780">
+<tr>
+<td><img src="logo.gif" alt="IIT Guwahati Logo" /></td>
+<td><h2 class="toptext">Department of Mathematics<br />
+<a href="http://www.iitg.ernet.in/">Indian Institute of Technology Guwahati</a></h2>
+<h4 class="toptext">Guwahati 781 039, India</h4></td>
+</tr>
+</table>
+</div>
+<div class="horizontalcssmenu">
+<ul id="cssmenu1"><li><a href="index.php">Home</a></li><li><a href="#">Programmes</a><ul><li><a href="acads/btech.php"> B.Tech.
+</a></li><li><a href="acads/minor.php"> Minor in Maths</a></li><li><a href="acads/msc.php"> M.Sc.
+</a></li><li><a
+href="acads/phd.php"> Ph.D.
+</a></li></ul></li><li><a href="#">People</a><ul><li><a href="people/faculty.php"> Faculty </a></li><li><a
+href="people/students.php"> Students </a></li><li><a href="people/staff.php"> Staff </a></li></ul></li><li><a
+href="#">Research</a><ul><li><a href="research/publications.php?y=2013"> Publications</a></li><li><a href="research/projects.php">
+Projects </a></li><li><a href="research/thesis.php"> Thesis </a></li></ul></li><li><a href="#">Events</a><ul><li><a
+href="events/workshop.php"> Workshops
+</a></li><li><a href="events/mseminars.php"> Mathematics Seminar Series
+</a></li><li><a href="events/rseminars.php"> RS Seminar Series
+</a></li></ul></li><li><a href="people/members.php">Committees
+</a></li><li><a href="placements/placement.php">Placement </a></li><li><a href="contact.php">Contact </a></li></ul><br style="clear:
+left;" />
+</div><div id="content">
+<div class="left"><p>The Department of Mathematics IIT Guwahati from its very inception in 1995
+has aimed to be a center of excellence in mathematics and
+computing and been vigorously engaged in both research and teaching.
+The vision of the department is not only to transform young people to
+competent and motivated professionals but also to contribute to the
+development of the nation, particularly the North-East, through
+research, consultancy and training activities. The department has at
+present 32 energetic and dedicated faculty members, and has a good number of
+distinguished mathematicians visiting it every year. The department has its
+own state-of-the-art computing laboratory and also houses the National
+Board of Higher Mathematics (NBHM) Regional Library.
+The department has also been actively engaged in organizing conferences, workshops, QIP
+short term courses and Mathematics Training and Talent Search Programme (MTTS).</p>
+<br />
+<p>Having started the PhD programme in 1996, the department commenced a
+2-year M.Sc. programme in Mathematics and Computing in 2000.
+From the academic year 2006-2007, the department has
+started a unique 4-year B.Tech. programme in Mathematics and Computing,the first of its kind in the country.
+The department also supports the engineering departments
+by offering core and advance courses in mathematics at the undergraduate
+B.Tech. level in various semesters.</p>
+</div>
+<div class="right">
+<h2>News &amp; Upcoming Events</h2>
+<ul>
+<li><img src="new.gif"/><a href="ext/phd/"><font style="color: blue; font-weight: bold;">Selected Candidates for Ph.D. (December,
+2012)</font></a></li>
+<li><a href="ext/NLA/workshop/info.html"><font color="blue">NCM ATMW on Numerical Linear Algebra</font></a></li>
+<li><a href="ext/NLA/conference/index.html"><font color="blue">NLAA 2013</font></a></li>
+<li><a href="http://www.iitg.ernet.in/wmf2012/"><font color="blue">WMF2012</font></a></li>
+<li><a href="http://www.iitg.ernet.in/recruitment/facultyrecruitment"><font color="blue">Faculty Interview</font></a></li>
+</ul>
+<h2>Students Corner</h2>
+<ul>
+<li><a href="http://www.thedimension.org">DIMENSION<br />(A Technical Confluence)</a></li>
+<li><a href="ext/time_table.pdf">Time Table</a></li>
+<li><a href="http://www.siam.org/students/chapters/current/iitg.php">IITG Chapter of SIAM</a></li><li><a href="http://www.matrixiitg.in/">MATRIX</a></li>
+</ul>
+<h2>Intranet &nbsp;(local)</h2>
+<ul>
+<li><a href="https://172.16.68.5/~soft/">Download</a></li>
+<li><a href="http://172.16.68.7">Ububtu 12.04 Repo</a></li>
+<li><a href="https://172.16.68.5/~cloud">Department Cloud</a></li>
+</ul>
+</div>
+<div style="clear: both;"> </div>
+</div>
+<div id="footer">
+Last updated: 22 February 2013</div>
+</div>
+</body>
+</html>
+Connection closed by foreign host.
+
+~$ telnet localhost 4567
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+POST / HTTP/1.0
+host: shilloi.iitg.ernet.in
+501 Not Implemented
+Connection closed by foreign host.
+
